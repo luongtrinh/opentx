@@ -2486,6 +2486,21 @@ uint16_t stackAvailable()
   #define OPENTX_INIT_ARGS
 #endif
 
+void sdCheckVersion(void)
+{
+  if (sdMounted()) {
+    FIL versionFile = {0};
+    UINT read = 0;
+    UINT version = 0;
+    FRESULT result = f_open(&versionFile, "/opentx.sdcard.version", FA_OPEN_EXISTING | FA_READ);
+    if ((result == FR_OK) && (f_size(&versionFile) == sizeof(int))) {
+      f_read(&versionFile, &version, sizeof(int), &read);
+      TRACE("sdCheckVersion : %x", version);
+    }
+    f_close(&versionFile);
+  }
+}
+
 void opentxInit(OPENTX_INIT_ARGS)
 {
 #if defined(DEBUG) && defined(USB_SERIAL)
@@ -2511,6 +2526,7 @@ void opentxInit(OPENTX_INIT_ARGS)
   else {
 #if defined(SDCARD) && !defined(PCBMEGA2560)
     sdInit();
+    sdCheckVersion();
 #endif
   }
 
